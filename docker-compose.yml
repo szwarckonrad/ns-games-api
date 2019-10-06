@@ -13,7 +13,7 @@ services:
       - MONGO_USER=${NS_GAMES_USER}
       - MONGO_PASSWORD=${NS_GAMES_PASSWORD}
     ports:
-      - "3001:3001"
+      - "3005:3005"
     volumes:
       - ./api:/ns-games-api/api
 

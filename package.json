@@ -7,7 +7,12 @@
     "start:dev": "tsc-watch --onSuccess \"node dist/server.js\"",
     "start:prod": "node dist/server.js"
   },
-  "keywords": ["api", "node", "mongodb", "nintendo"],
+  "keywords": [
+    "api",
+    "node",
+    "mongodb",
+    "nintendo"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/szwarckonrad/ns-games-api.git"
