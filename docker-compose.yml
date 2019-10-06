@@ -1,0 +1,42 @@
+version: "3.4"
+
+services:
+  ns-games-api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    container_name: ns-games-api-dev
+    environment:
+      - MONGO_URL=${NS_GAMES_DB_URL}
+      - MONGO_DB=${NS_GAMES_DB}
+      - MONGO_USER=${NS_GAMES_USER}
+      - MONGO_PASSWORD=${NS_GAMES_PASSWORD}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./api:/ns-games-api/api
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${NS_GAMES_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${NS_GAMES_PASSWORD}
+      - MONGO_INITDB_ROOT_DATABASE=${NS_GAMES_DB}
+    volumes:
+      - ./db/data:/data/db
+
+  ns-games-spreadsheet:
+    build:
+      context: .
+      dockerfile: ./scripts/Dockerfile
+    container_name: ns-games-spreadsheet
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=${NS_GAMES_DB_URL}
+      - MONGO_DB=${NS_GAMES_DB}
+      - MONGO_USER=${NS_GAMES_USER}
+      - MONGO_PASSWORD=${NS_GAMES_PASSWORD}

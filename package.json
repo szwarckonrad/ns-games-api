@@ -1,0 +1,29 @@
+{
+  "name": "ns-games-api",
+  "version": "1.0.0",
+  "description": "Api that allows user to fetch all released physical and digital Nintendo Switch Games.",
+  "scripts": {
+    "dev": "docker-compose up --build ns-games-api-dev mongo",
+    "start:dev": "tsc-watch --onSuccess \"node dist/server.js\"",
+    "start:prod": "node dist/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "1.19.0",
+    "express": "4.17.1",
+    "google-spreadsheet": "2.0.8",
+    "lodash": "4.17.15",
+    "mongoose": "5.7.3",
+    "saslprep": "1.0.3",
+    "typescript": "3.6.3"
+  },
+  "devDependencies": {
+    "@types/express": "4.17.1",
+    "@types/lodash": "4.14.141",
+    "@types/mongoose": "5.5.19",
+    "tsc-watch": "4.0.0",
+    "tslint": "5.20.0"
+  }
+}
