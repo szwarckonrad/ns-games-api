@@ -27,6 +27,7 @@ services:
       - MONGO_INITDB_ROOT_DATABASE=${NS_GAMES_DB}
     volumes:
       - ./db/data:/data/db
+      - ./db/backup:/mongo-dump
 
   ns-games-spreadsheet:
     build:
@@ -40,3 +41,4 @@ services:
       - MONGO_DB=${NS_GAMES_DB}
       - MONGO_USER=${NS_GAMES_USER}
       - MONGO_PASSWORD=${NS_GAMES_PASSWORD}
+
