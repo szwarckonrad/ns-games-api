@@ -3,7 +3,7 @@ import {map, reduce, isEqual, find, pick} from "lodash";
 import {Document} from "mongoose";
 
 import {closeDbConnection, openDbConnection} from "../api/utils/db_connector";
-import {releasedGame} from "../api/models/releasedGameModel";
+import {releasedGameModel} from "../api/models/releasedGameModel";
 
 
 interface IGoogleSpreadsheetResponseGame extends IReleasedGame {
@@ -45,7 +45,7 @@ const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0"
                 offset: 4
             },
             async (error: any, rows: IGoogleSpreadsheetResponse) => {
-                const storedGames = await releasedGame.find();
+                const storedGames = await releasedGameModel.find();
 
                 const parsedRows = map(rows, row => {
                     const {
@@ -82,7 +82,7 @@ const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0"
                 }, []);
 
                 if (newGames.length) {
-                    await releasedGame.insertMany(parsedRows)
+                    await releasedGameModel.insertMany(parsedRows)
                         .then(() => console.log("Documents saved"))
                         .catch(reason => console.error(reason));
                 } else {
@@ -91,7 +91,7 @@ const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0"
 
                 if (updatedGames.length) {
                     await Promise.all(map(updatedGames, async (game) =>
-                        await releasedGame.replaceOne({gametitle: game.gametitle}, game)
+                        await releasedGameModel.replaceOne({gametitle: game.gametitle}, game)
                             .then(() => console.log(`Game ${game.gametitle} updated`))
                             .catch((replaceOneError) => console.error(replaceOneError))
                     ));
