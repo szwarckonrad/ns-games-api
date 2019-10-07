@@ -52,7 +52,7 @@ openDbConnection()
                     }, []);
 
                     const updatedGames = reduce(parsedRows, (acc: IReleasedGame[], game) => {
-                        const foundGame = find(storedGames, storedGame => {
+                        const foundGame = find([...storedGames, ...newGames], storedGame => {
                             const strippedGameDocument = pick(storedGame, ["gametitle", "release", "usadate", "jpndate", "eurdate", "ausdate", "usacart", "jpncart", "eurcart", "auscart", "english", "notes"]);
                             return isEqual(game, strippedGameDocument);
                         });
@@ -65,8 +65,8 @@ openDbConnection()
                     }, []);
 
                     if (newGames.length) {
-                        await releasedGameModel.insertMany(parsedRows)
-                            .then(() => console.log("Documents saved"))
+                        await releasedGameModel.insertMany(newGames)
+                            .then(() => console.log(`${newGames.length} games added.`))
                             .catch(reason => console.error(reason));
                     } else {
                         console.log("No new games");
@@ -75,7 +75,7 @@ openDbConnection()
                     if (updatedGames.length) {
                         await Promise.all(map(updatedGames, async (game) =>
                             await releasedGameModel.replaceOne({gametitle: game.gametitle}, game)
-                                .then(() => console.log(`Game ${game.gametitle} updated`))
+                                .then(() => console.log(`Game ${game.gametitle} updated. Total updated games: ${updatedGames.length}`))
                                 .catch((replaceOneError) => console.error(replaceOneError))
                         ));
                     } else {
