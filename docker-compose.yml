@@ -17,6 +17,20 @@ services:
     volumes:
       - ./api:/ns-games-api/api
 
+  ns-games-api-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ns-games-api-production
+    environment:
+      - MONGO_URL=${NS_GAMES_DB_URL}
+      - MONGO_DB=${NS_GAMES_DB}
+      - MONGO_USER=${NS_GAMES_USER}
+      - MONGO_PASSWORD=${NS_GAMES_PASSWORD}
+    ports:
+      - "3005:3005"
+
   mongo:
     image: mongo
     ports:
