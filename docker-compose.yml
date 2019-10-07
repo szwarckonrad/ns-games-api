@@ -25,6 +25,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${NS_GAMES_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${NS_GAMES_PASSWORD}
       - MONGO_INITDB_ROOT_DATABASE=${NS_GAMES_DB}
+    restart: on-failure
     volumes:
       - ./db/data:/data/db
       - ./db/backup:/mongo-dump
