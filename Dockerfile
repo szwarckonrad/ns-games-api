@@ -14,5 +14,5 @@ ENTRYPOINT ["npm", "run", "start:dev"]
 ###
 FROM base as production
 ENV RUN_ENV production
-RUN tsc
+RUN npx tsc
 ENTRYPOINT ["npm", "run", "start:prod"]
