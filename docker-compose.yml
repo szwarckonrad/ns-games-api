@@ -23,6 +23,7 @@ services:
       dockerfile: Dockerfile
       target: production
     container_name: ns-games-api-production
+    restart: on-failure
     environment:
       - MONGO_URL=${NS_GAMES_DB_URL}
       - MONGO_DB=${NS_GAMES_DB}
