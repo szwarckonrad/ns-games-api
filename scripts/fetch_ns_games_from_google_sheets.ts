@@ -69,7 +69,7 @@ const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0"
                 }, []);
 
                 const updatedGames = reduce(parsedRows, (acc: IReleasedGame[], game) => {
-                    const foundGame = find(storedGames as IDocumentReleasedGame[], storedGame => {
+                    const foundGame = find([...storedGames as IDocumentReleasedGame[], ...newGames], storedGame => {
                         const strippedGameDocument = pick(storedGame, ["gametitle", "release", "usadate", "jpndate", "eurdate", "ausdate", "usacart", "jpncart", "eurcart", "auscart", "english", "notes"]);
                         return isEqual(game, strippedGameDocument);
                     });
@@ -82,8 +82,8 @@ const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0"
                 }, []);
 
                 if (newGames.length) {
-                    await releasedGameModel.insertMany(parsedRows)
-                        .then(() => console.log("Documents saved"))
+                    await releasedGameModel.insertMany(newGames)
+                        .then(() => console.log(`${newGames.length} games added.`))
                         .catch(reason => console.error(reason));
                 } else {
                     console.log("No new games");
@@ -92,7 +92,7 @@ const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0"
                 if (updatedGames.length) {
                     await Promise.all(map(updatedGames, async (game) =>
                         await releasedGameModel.replaceOne({gametitle: game.gametitle}, game)
-                            .then(() => console.log(`Game ${game.gametitle} updated`))
+                            .then(() => console.log(`Game ${game.gametitle} updated. Total updated games: ${updatedGames.length}`))
                             .catch((replaceOneError) => console.error(replaceOneError))
                     ));
                 } else {
