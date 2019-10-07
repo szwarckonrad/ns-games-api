@@ -1,7 +1,22 @@
 import {Schema} from "mongoose";
 
 
-export const gameSchema = new Schema({
+export interface IReleasedGame {
+    gametitle: string;
+    release: string;
+    usadate: string;
+    jpndate: string;
+    eurdate: string;
+    ausdate: string;
+    usacart: string;
+    jpncart: string;
+    eurcart: string;
+    auscart: string;
+    english: string;
+    notes: string;
+}
+
+export const gameSchema = new Schema<IReleasedGame>({
     gametitle: String,
     release: String,
     usadate: String,

@@ -17,4 +17,3 @@ export const openDbConnection = () =>
             console.error("Database connection error: ", err);
         });
 
-export const closeDbConnection = (cb: () => void) => mongoose.connection.close(cb);

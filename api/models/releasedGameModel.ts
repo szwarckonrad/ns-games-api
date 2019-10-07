@@ -1,5 +1,7 @@
-import {model} from "mongoose";
-import {gameSchema} from "../schemas/gameSchema";
+import {model, Document} from "mongoose";
+import {gameSchema, IReleasedGame} from "../schemas/gameSchema";
 
 
-export const releasedGameModel = model("ns_games", gameSchema);
+interface IReleaseGameModel extends Document, IReleasedGame {}
+
+export const releasedGameModel = model<IReleaseGameModel>("ns_games", gameSchema);

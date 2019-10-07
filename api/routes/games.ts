@@ -1,6 +1,7 @@
 import express, {Request, Response} from "express";
 
 import {releasedGameModel} from "../models/releasedGameModel";
+import {responseGameParser} from "../utils/response_game_parser";
 
 
 const gamesRouter = express.Router();
@@ -8,7 +9,8 @@ const gamesRouter = express.Router();
 gamesRouter
     .get("/game", async (req, res) => {
         try {
-            const result = await releasedGameModel.find({}, "-_id -__v").exec();
+            const gamesRaw = await releasedGameModel.find({}, "-_id -__v").lean().exec();
+            const result = responseGameParser(gamesRaw);
             res.send(result);
         } catch (error) {
             res.status(500).send(error);

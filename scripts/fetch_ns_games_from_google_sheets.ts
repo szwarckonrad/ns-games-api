@@ -1,9 +1,9 @@
 import GoogleSpreadsheet from "google-spreadsheet";
-import {map, reduce, isEqual, find, pick} from "lodash";
-import {Document} from "mongoose";
+import {map, reduce, isEqual, find, pick, Dictionary} from "lodash";
 
-import {closeDbConnection, openDbConnection} from "../api/utils/db_connector";
+import {openDbConnection} from "../api/utils/db_connector";
 import {releasedGameModel} from "../api/models/releasedGameModel";
+import {IReleasedGame} from "../api/schemas/gameSchema";
 
 
 interface IGoogleSpreadsheetResponseGame extends IReleasedGame {
@@ -14,93 +14,74 @@ interface IGoogleSpreadsheetResponseGame extends IReleasedGame {
     del: () => void;
 }
 
-interface IDocumentReleasedGame extends Document, IReleasedGame {}
-
-interface IReleasedGame {
-    gametitle: string;
-    release: string;
-    usadate: string;
-    jpndate: string;
-    eurdate: string;
-    ausdate: string;
-    usacart: string;
-    jpncart: string;
-    eurcart: string;
-    auscart: string;
-    english: string;
-    notes: string;
-}
 
 type IGoogleSpreadsheetResponse = IGoogleSpreadsheetResponseGame[];
 
-openDbConnection();
+openDbConnection()
+    .then(() => {
+        const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0");
 
-const doc = new GoogleSpreadsheet("1FNyvbbU64Pb9lheg28gC_5fMalIYJ0aD763T7M1QqF0");
+        doc.getInfo((err: Error, info: {worksheets: Dictionary<any>[]}) => {
+            const sheet = info.worksheets[0];
+            sheet.getRows(
+                {
+                    offset: 4
+                },
+                async (error: any, rows: IGoogleSpreadsheetResponse) => {
+                    const storedGames = await releasedGameModel.find();
 
-(() => {
-    doc.getInfo((err: any, info: any) => {
-        const sheet = info.worksheets[0];
-        sheet.getRows(
-            {
-                offset: 4
-            },
-            async (error: any, rows: IGoogleSpreadsheetResponse) => {
-                const storedGames = await releasedGameModel.find();
+                    const parsedRows = map(rows, row => {
+                        const {
+                            gametitle, release, usadate, jpndate, eurdate,
+                            ausdate, usacart, jpncart, eurcart, auscart,
+                            english, notes
+                        } = row;
 
-                const parsedRows = map(rows, row => {
-                    const {
-                        gametitle, release, usadate, jpndate, eurdate,
-                        ausdate, usacart, jpncart, eurcart, auscart,
-                        english, notes
-                    } = row;
-
-                    return {
-                        gametitle, release, usadate, jpndate, eurdate,
-                        ausdate, usacart, jpncart, eurcart, auscart, english, notes
-                    };
-                });
-
-                const newGames = reduce(parsedRows, (acc: IReleasedGame[], game) => {
-                    const foundGame = find(storedGames as IDocumentReleasedGame[], storedGame => storedGame.gametitle === game.gametitle);
-                    if (!foundGame) {
-                        return [...acc, game];
-                    }
-                    return acc;
-                }, []);
-
-                const updatedGames = reduce(parsedRows, (acc: IReleasedGame[], game) => {
-                    const foundGame = find(storedGames as IDocumentReleasedGame[], storedGame => {
-                        const strippedGameDocument = pick(storedGame, ["gametitle", "release", "usadate", "jpndate", "eurdate", "ausdate", "usacart", "jpncart", "eurcart", "auscart", "english", "notes"]);
-                        return isEqual(game, strippedGameDocument);
+                        return {
+                            gametitle, release, usadate, jpndate, eurdate,
+                            ausdate, usacart, jpncart, eurcart, auscart, english, notes
+                        };
                     });
 
-                    if (!foundGame) {
-                        return [...acc, game];
+                    const newGames = reduce(parsedRows, (acc: IReleasedGame[], game) => {
+                        const foundGame = find(storedGames, storedGame => storedGame.gametitle === game.gametitle);
+                        if (!foundGame) {
+                            return [...acc, game];
+                        }
+                        return acc;
+                    }, []);
+
+                    const updatedGames = reduce(parsedRows, (acc: IReleasedGame[], game) => {
+                        const foundGame = find(storedGames, storedGame => {
+                            const strippedGameDocument = pick(storedGame, ["gametitle", "release", "usadate", "jpndate", "eurdate", "ausdate", "usacart", "jpncart", "eurcart", "auscart", "english", "notes"]);
+                            return isEqual(game, strippedGameDocument);
+                        });
+
+                        if (!foundGame) {
+                            return [...acc, game];
+                        }
+
+                        return acc;
+                    }, []);
+
+                    if (newGames.length) {
+                        await releasedGameModel.insertMany(parsedRows)
+                            .then(() => console.log("Documents saved"))
+                            .catch(reason => console.error(reason));
+                    } else {
+                        console.log("No new games");
                     }
 
-                    return acc;
-                }, []);
-
-                if (newGames.length) {
-                    await releasedGameModel.insertMany(parsedRows)
-                        .then(() => console.log("Documents saved"))
-                        .catch(reason => console.error(reason));
-                } else {
-                    console.log("No new games");
-                }
-
-                if (updatedGames.length) {
-                    await Promise.all(map(updatedGames, async (game) =>
-                        await releasedGameModel.replaceOne({gametitle: game.gametitle}, game)
-                            .then(() => console.log(`Game ${game.gametitle} updated`))
-                            .catch((replaceOneError) => console.error(replaceOneError))
-                    ));
-                } else {
-                    console.log("No updated games found");
-                }
-
-                closeDbConnection(() => console.log("connection closed"));
-
-            });
+                    if (updatedGames.length) {
+                        await Promise.all(map(updatedGames, async (game) =>
+                            await releasedGameModel.replaceOne({gametitle: game.gametitle}, game)
+                                .then(() => console.log(`Game ${game.gametitle} updated`))
+                                .catch((replaceOneError) => console.error(replaceOneError))
+                        ));
+                    } else {
+                        console.log("No updated games found");
+                    }
+                    process.exit();
+                });
+        });
     });
-})();
