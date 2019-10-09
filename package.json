@@ -4,6 +4,7 @@
   "description": "Api that allows user to fetch all released physical and digital Nintendo Switch Games.",
   "scripts": {
     "dev": "docker-compose up --build ns-games-api-dev mongo",
+    "build": "tsc",
     "start:dev": "tsc-watch --onSuccess \"node dist/server.js\"",
     "start:prod": "node dist/server.js"
   },
