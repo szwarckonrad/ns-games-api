@@ -5,6 +5,8 @@ stages:
 
 variables:
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/k.szwarc/ns-games-api/$CI_COMMIT_REF_NAME:latest
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://localhost:2375
 
 image: node:8.12
 build:
@@ -22,7 +24,7 @@ build:
 
 build-image:
   stage: push-image
-  image: docker:git
+  image: docker:stable
   services:
     - docker:dind
   tags:
