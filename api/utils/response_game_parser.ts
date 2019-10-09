@@ -1,11 +1,11 @@
-import {map} from "lodash";
+import {map, orderBy} from "lodash";
 import moment from "moment";
 
 import {IReleasedGame} from "../schemas/gameSchema";
 
 
 export const responseGameParser = (games: IReleasedGame[]) => {
-    return map(games, game => {
+    return orderBy(map(games, game => {
         return {
             ...game,
             release: parseInt(game.release, 10),
@@ -19,7 +19,7 @@ export const responseGameParser = (games: IReleasedGame[]) => {
             auscart: parseReleaseCartSerial(game.auscart),
             english: game.english === "Yes"
         };
-    });
+    }), "release", "desc");
 };
 
 const parseReleaseDate = (date: string) => {
