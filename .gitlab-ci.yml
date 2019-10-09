@@ -1,6 +1,7 @@
 stages:
   - build
   - push-image
+  - deploy-prod
 
 variables:
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/k.szwarc/ns-games-api/$CI_COMMIT_REF_NAME:latest
@@ -31,3 +32,15 @@ build-image:
   script:
     - docker build -t $CONTAINER_RELEASE_IMAGE --target production .
     - docker push $CONTAINER_RELEASE_IMAGE
+
+deploy:
+  stage: deploy-prod
+  image: ubuntu:latest
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh-add <(echo "$PROD_SSH_KEY")
+    - ssh -o StrictHostKeyChecking=no -p $PROD_SSH_PORT "$PROD_SSH_USER"@"$PROD_IP" 'ls -al'
