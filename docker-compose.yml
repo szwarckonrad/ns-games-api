@@ -18,10 +18,7 @@ services:
       - ./api:/ns-games-api/api
 
   ns-games-api-prod:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: production
+    image: ${NS_GAMES_PRODUCTION_IMAGE}
     container_name: ns-games-api-production
     restart: on-failure
     environment:
