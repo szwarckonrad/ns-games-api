@@ -44,3 +44,4 @@ deploy:
   script:
     - ssh-add <(echo "$PROD_SSH_KEY")
     - ssh -o StrictHostKeyChecking=no -p $PROD_SSH_PORT "$PROD_SSH_USER"@"$PROD_IP" 'ls -al'
+
