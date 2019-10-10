@@ -1,43 +1,43 @@
 stages:
-#  - build
-#  - push-image
+  - build
+  - push-image
   - deploy-prod
 
 variables:
   CONTAINER_RELEASE_IMAGE: registry.gitlab.com/k.szwarc/ns-games-api/$CI_COMMIT_REF_NAME:latest
 
-#image: node:8.12
-#build:
-#  stage: build
-#  tags:
-#    - docker
-#  cache:
-#    paths:
-#      - dist/
-#      - node_modules/
-#  before_script:
-#    - npm install
-#  script:
-#    - npm run build
-#
-#build-image:
-#  stage: push-image
-#  image: docker:18.09
-#  services:
-#    - docker:18.09-dind
-#  tags:
-#    - docker
-#  before_script:
-#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-#  script:
-#    - docker build -t $CONTAINER_RELEASE_IMAGE --target production .
-#    - docker push $CONTAINER_RELEASE_IMAGE
+image: node:8.12
+build:
+  stage: build
+  tags:
+    - docker
+  cache:
+    paths:
+      - dist/
+      - node_modules/
+  before_script:
+    - npm install
+  script:
+    - npm run build
+
+build-image:
+  stage: push-image
+  image: docker:18.09
+  services:
+    - docker:18.09-dind
+  tags:
+    - docker
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CONTAINER_RELEASE_IMAGE --target production .
+    - docker push $CONTAINER_RELEASE_IMAGE
 
 deploy:
   stage: deploy-prod
   image: ubuntu:latest
-#  tags:
-#    - docker
+  tags:
+    - docker
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
@@ -45,6 +45,6 @@ deploy:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
     - chmod 600 $PROD_SSH_KEY
-    - pwd
-    - whoami
     - ssh -o StrictHostKeyChecking=no -p $PROD_SSH_PORT "$PROD_SSH_USER"@"$PROD_IP" -i $PROD_SSH_KEY '/bin/bash /home/kd/scripts/deploy_gitlab.sh'
+  only:
+    - master
