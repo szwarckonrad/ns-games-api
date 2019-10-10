@@ -45,4 +45,4 @@ deploy:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
     - chmod 600 $PROD_SSH_KEY
-    - ssh -o StrictHostKeyChecking=no -p $PROD_SSH_PORT "$PROD_SSH_USER"@"$PROD_IP" -i $PROD_SSH_KEY '/bin/bash $PROD_DEPLOY_SCRIPT'
+    - ssh -o StrictHostKeyChecking=no -p $PROD_SSH_PORT "$PROD_SSH_USER"@"$PROD_IP" -i $PROD_SSH_KEY '/bin/bash /home/kd/scripts/deploy_gitlab.sh'
